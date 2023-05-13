@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IpLocationService", "IpLocationService\IpLocationService.csproj", "{5C48DC0F-A332-4411-A124-33F31C3F2C3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{CF55CA8F-C407-46EC-880E-A70E503C353F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IpLocationService.Domain", "IpLocationService.Domain\IpLocationService.Domain.csproj", "{4D26C1F0-25AA-4D40-ADF8-0AA09A8DA343}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DAL", "DAL", "{74228EF9-0E62-4C28-944B-91C6FD2A6E99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IpLocationService.DAL", "IpLocationService.DAL\IpLocationService.DAL.csproj", "{86509847-F368-42A5-888E-C3666B9CFDB8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{D755E279-7E11-4AAA-8EB7-BA6C6A571E12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IpLocationService.Service", "IpLocationService.Service\IpLocationService.Service.csproj", "{7986B437-CBF9-4792-B595-0B20E5B424B4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C48DC0F-A332-4411-A124-33F31C3F2C3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C48DC0F-A332-4411-A124-33F31C3F2C3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C48DC0F-A332-4411-A124-33F31C3F2C3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C48DC0F-A332-4411-A124-33F31C3F2C3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D26C1F0-25AA-4D40-ADF8-0AA09A8DA343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D26C1F0-25AA-4D40-ADF8-0AA09A8DA343}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D26C1F0-25AA-4D40-ADF8-0AA09A8DA343}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D26C1F0-25AA-4D40-ADF8-0AA09A8DA343}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86509847-F368-42A5-888E-C3666B9CFDB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86509847-F368-42A5-888E-C3666B9CFDB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86509847-F368-42A5-888E-C3666B9CFDB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86509847-F368-42A5-888E-C3666B9CFDB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7986B437-CBF9-4792-B595-0B20E5B424B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7986B437-CBF9-4792-B595-0B20E5B424B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7986B437-CBF9-4792-B595-0B20E5B424B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7986B437-CBF9-4792-B595-0B20E5B424B4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4D26C1F0-25AA-4D40-ADF8-0AA09A8DA343} = {CF55CA8F-C407-46EC-880E-A70E503C353F}
+		{86509847-F368-42A5-888E-C3666B9CFDB8} = {74228EF9-0E62-4C28-944B-91C6FD2A6E99}
+		{7986B437-CBF9-4792-B595-0B20E5B424B4} = {D755E279-7E11-4AAA-8EB7-BA6C6A571E12}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E906A349-E0D9-469B-B42D-DF76142AEDBD}
+	EndGlobalSection
+EndGlobal
