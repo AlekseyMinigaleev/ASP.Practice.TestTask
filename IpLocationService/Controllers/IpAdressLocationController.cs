@@ -26,30 +26,28 @@ namespace IpLocationService.Controllers
 
         private async Task<IActionResult> MainLogic (IpRequest request)
         {
-            if (request is null)
-                return new JsonResult("Null exception");
+            if (!IpAdressLocationService.IsValidIp(request.Ip))
+                return new JsonResult("Invalid IP");
 
             if (request.Provider == 0)
-                return new JsonResult("Null provider exception");
+                return new JsonResult("provider is required fill");
 
-            /*TODO change to ErrorMessage*/
-            if (request.Ip is null)
-            {
-                var response = await ipAdressLocationService.GetAllAsync();
-                return new JsonResult(response.Result);
-            }
-
-            if (!ipAdressLocationService.IsValidIp(request.Ip))
-                return Content("Invalid IP");
+            if (!Enum.IsDefined(typeof(Provider), request.Provider))
+                return new JsonResult("Invalid provider");
 
             var responce = await ipAdressLocationService.GetAsync(request);
             if (responce.StatusCode == Domain.Enum.StatusCode.Ok)
-                return new JsonResult(responce.Result);
+                return new JsonResult(new 
+                {
+                    responce.Result.Ip,
+                    Provider = responce.Result.Provider.ToString(),
+                    responce.Result.City,
+                    responce.Result.Region,
+                    responce.Result.Country,
+                    responce.Result.Timezone,
+                });
 
-            /*TODO how is view ErrorMessage was been returning*/
-            return Content(responce.Message!);
+            return new JsonResult(responce.Message!);
         }
-
-        /*TODO country code to country name*/
     }
 }

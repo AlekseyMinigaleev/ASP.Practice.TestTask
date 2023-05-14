@@ -4,7 +4,7 @@ using IpLocationService.Domain.Enum;
 using IpLocationService.Domain.Responce;
 using Newtonsoft.Json;
 using System.Net;
-using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 
 namespace IpLocationService.Service.Implementations
 {
@@ -19,46 +19,15 @@ namespace IpLocationService.Service.Implementations
             this.adressLocationRepository = adressLocationRepository;
         }
 
-        /*Usless*/
-        public async Task<BaseResponse<IEnumerable<IpAdressLocation>>> GetAllAsync()
-        {
-            try
-            {
-                var locationResponses = await adressLocationRepository.GetAllAsync();
-
-                if (locationResponses.Count == 0)
-                    return new BaseResponse<IEnumerable<IpAdressLocation>>
-                    {
-                        Message = "DataBase is empty",
-                        StatusCode = StatusCode.NotFount,
-                    };
-
-                return new BaseResponse<IEnumerable<IpAdressLocation>>
-                {
-                    Result = locationResponses,
-                    StatusCode  = StatusCode.Ok
-                };
-            }
-            /*TODO mb rework*/
-            catch (Exception e)
-            {
-                return new BaseResponse<IEnumerable<IpAdressLocation>>()
-                {
-                    Message = $"[GetAllAsync]: {e.Message}",
-                    StatusCode = StatusCode.Error
-                };
-            }
-        }
-
-        public async Task<BaseResponse<IpAdressLocation>> GetAsync(IpRequest request)
+        public async Task<Response<IpAdressLocation>> GetAsync(IpRequest request)
         {
             try
             {
                 IpAdressLocation ipAddressLocation;
-                var isExist = await adressLocationRepository.IsExistByIpAsync(request.Ip);
-                if (isExist)
+                var isExistInDatatbase = await adressLocationRepository.IsExistByIpRequestAsync(request);
+                if (isExistInDatatbase)
                 {
-                    ipAddressLocation = (await adressLocationRepository.GetByIpAsync(request.Ip))!;
+                    ipAddressLocation = (await adressLocationRepository.GetByIpRequestAsync(request))!;
                 }
                 else
                 {
@@ -66,7 +35,7 @@ namespace IpLocationService.Service.Implementations
                     await adressLocationRepository.AddAsync(ipAddressLocation);
                 }
 
-                return new BaseResponse<IpAdressLocation>
+                return new Response<IpAdressLocation>
                 {
                     Result = ipAddressLocation,
                     StatusCode = StatusCode.Ok,
@@ -74,7 +43,7 @@ namespace IpLocationService.Service.Implementations
             }
             catch (Exception e)
             {
-                return new BaseResponse<IpAdressLocation>
+                return new Response<IpAdressLocation>
                 {
                     Message = e.Message,
                     StatusCode  = StatusCode.Error,
@@ -86,22 +55,22 @@ namespace IpLocationService.Service.Implementations
         {
             var (apiUrl, parametrs) = GetDataForRequestToProvider(request);
             var providerResponse = await GetResponseFromProviderAsync(apiUrl);
-            var ipAddressLocation = await ConvertResponseToLocationResponseAsync(providerResponse, parametrs);
+            var ipAddressLocation = await ConvertResponseToIpAdressLocation(providerResponse, parametrs);
+            ipAddressLocation.Provider = request.Provider;
 
             if (ipAddressLocation is null)
-                throw new Exception("location was not determined");
+                throw new Exception("Location was not determined");
 
             return ipAddressLocation;
         }
 
-        #region Utils
         /*TODO TESTS*/
-        public bool IsValidIp(string ip)
+        public static bool IsValidIp(string ip)
         {
             if(ip is null)
                 return false;
-
-            return IPAddress.TryParse(ip, out _);
+            var  pattern = @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+            return Regex.IsMatch(ip, pattern);
         }
 
         /*TODO hardCode*/
@@ -109,9 +78,9 @@ namespace IpLocationService.Service.Implementations
         {
             switch (request.Provider)
             {
-                case Provider.IpGeolocation:
+                case Provider.Ipgeolocation:
                     {
-                        var parameters = new Dictionary<string, string>
+                        var fieldMappings = new Dictionary<string, string>
                             {
                                 {"Ip", "ip"},
                                 {"City", "city"},
@@ -121,11 +90,11 @@ namespace IpLocationService.Service.Implementations
                             };
                         var apiUrl = $"https://api.ipgeolocation.io/ipgeo?apiKey={IPGEOLOCATION_TOKEN}&ip={request.Ip}";
 
-                        return (apiUrl, parameters);
+                        return (apiUrl, fieldMappings);
                     }
-                case Provider.IpInfo:
+                case Provider.Ipinfo:
                     {
-                        var parameters = new Dictionary<string, string>
+                        var fieldMappings = new Dictionary<string, string>
                             {
                                 {"Ip", "ip"},
                                 {"City", "city"},
@@ -134,7 +103,7 @@ namespace IpLocationService.Service.Implementations
                                 {"Timezone", "timezone"},
                             };
                         var apiUrl = $"https://ipinfo.io/{request.Ip}?token={IPINFO_TOKEN}";
-                        return (apiUrl, parameters);
+                        return (apiUrl, fieldMappings);
                     }
                 default:
                     throw new Exception("Invalid provider");
@@ -150,13 +119,13 @@ namespace IpLocationService.Service.Implementations
 
         /*TODO ???*/
         #region ne ponyatno nihuya
-        private async Task<IpAdressLocation> ConvertResponseToLocationResponseAsync(HttpResponseMessage response, Dictionary<string, string> parameters)
+        private async Task<IpAdressLocation> ConvertResponseToIpAdressLocation(HttpResponseMessage response, Dictionary<string, string> parameters)
         {
             var jsonContent = await response.Content.ReadAsStringAsync();
             dynamic jObject = JsonConvert.DeserializeObject(jsonContent);
 
             var locationResponse = new IpAdressLocation();
-
+        
             foreach (var parameter in parameters)
             {
                 var propertyInfo = typeof(IpAdressLocation).GetProperty(parameter.Key);
@@ -185,7 +154,6 @@ namespace IpLocationService.Service.Implementations
 
             return result?.ToString();
         }
-        #endregion
         #endregion
     }
 }

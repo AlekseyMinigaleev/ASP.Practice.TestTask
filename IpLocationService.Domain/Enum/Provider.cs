@@ -2,7 +2,7 @@
 {
     public enum Provider
     {
-        IpGeolocation = 1,
-        IpInfo = 2,
+        Ipgeolocation = 1,
+        Ipinfo = 2,
     }
 }

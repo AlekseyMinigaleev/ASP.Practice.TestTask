@@ -26,4 +26,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+/*TODO Delere before sending task*/
+using (var db = new ApplicationDbContext())
+{
+    await db.Database.EnsureDeletedAsync();    
+}
+
 app.Run();
