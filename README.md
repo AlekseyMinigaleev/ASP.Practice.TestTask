@@ -43,6 +43,7 @@ POST http://localhost/Controller/Action
 ```
 GET http://localhost/Controller/Action?IP=192.168.0.0&provider=2
 ### Пример ответа
+```
 {
   "IP": "192.168.0.0",
   "City": "Москва",
@@ -50,6 +51,7 @@ GET http://localhost/Controller/Action?IP=192.168.0.0&provider=2
   "Country": "Россия",
   "Timezone": "Europe/Moscow"
 }
+```
 
 ## Документация
 Документация к коду находится в xml комментариях
