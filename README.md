@@ -32,3 +32,24 @@
   + Country - Страна
   + Timezone - Временная зона
   + Пример запроса
+
+### Пример запроса
+POST http://localhost/Controller/Action
+```
+{
+  "IP": "192.168.0.0",
+  "PROVIDER": "1"
+}
+```
+GET http://localhost/Controller/Action?IP=192.168.0.0&provider=2
+### Пример ответа
+{
+  "IP": "192.168.0.0",
+  "City": "Москва",
+  "Region": "Москва",
+  "Country": "Россия",
+  "Timezone": "Europe/Moscow"
+}
+
+## Документация
+Документация к коду находится в xml комментариях
