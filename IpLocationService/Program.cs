@@ -1,6 +1,6 @@
 using IpLocationService.DAL;
 using IpLocationService.DAL.Repositories;
-using IpLocationService.Service.Implementations;
+using IpLocationService.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,11 +25,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-/*TODO Delere before sending task*/
-using (var db = new ApplicationDbContext())
-{
-    await db.Database.EnsureDeletedAsync();    
-}
 
 app.Run();

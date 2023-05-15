@@ -4,10 +4,20 @@ using Microsoft.Extensions.Configuration;
 
 namespace IpLocationService.DAL
 {
+    /// <summary>
+    /// Класс контекста для базы данных приложения.
+    /// </summary>
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<IpAdressLocation> IpAdressLocations { get; set; }
+        /// <summary>
+        /// Свойство, представляющее таблицу записей местоположения IP-адресов.
+        /// </summary>
+        public DbSet<IpAddressLocation> IpAdressLocations { get; set; }
 
+        /// <summary>
+        /// Создает новый экземпляр класса <see cref="ApplicationDbContext"/>.
+        /// </summary>
+        /// <remarks>В момент создания экземпляра класса, создается база данные, если она не была создана.</remarks>
         public ApplicationDbContext()
         {
             Database.EnsureCreated();
@@ -17,21 +27,18 @@ namespace IpLocationService.DAL
         {
             /*TODO ???*/
             var builder = new ConfigurationBuilder();
-            // установка пути к текущему каталогу
             builder.SetBasePath(Directory.GetCurrentDirectory());
-            // получаем конфигурацию из файла appsettings.json
             builder.AddJsonFile("appsettings.json");
-            // создаем конфигурацию
             var config = builder.Build();
 
-            var connectionString = config.GetConnectionString("SqliteConnection");
-            optionsBuilder.UseSqlite(connectionString);
+            var connectionString = config.GetConnectionString("SqlServerConntection");
+            optionsBuilder.UseSqlServer(connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Ignore<IpRequest>();
-            modelBuilder.Entity<IpAdressLocation>()
+            modelBuilder.Entity<IpAddressLocation>()
               .HasKey(_ => _.Id);
         }
     }

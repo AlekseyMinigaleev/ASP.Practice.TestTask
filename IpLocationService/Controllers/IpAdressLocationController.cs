@@ -1,53 +1,76 @@
 ﻿using IpLocationService.Domain.Entity;
 using IpLocationService.Domain.Enum;
-using IpLocationService.Service.Implementations;
+using IpLocationService.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IpLocationService.Controllers
 {
+    /// <summary>
+    /// API-контроллер для получения информации о местоположении IP-адреса.
+    /// </summary>
+    /// <remarks>
+    /// Контроллер предоставляет POST/GET HTTP метод для получения информации о местоположении IP-адреса в формате <see cref="JsonResult"/>.
+    /// </remarks>
     [Route("api/[controller]")]
     [ApiController]
     public class IpAdressLocationController : ControllerBase
     {
         private readonly IpAdressLocationService ipAdressLocationService;
 
+        /// <summary>
+        /// Создает новый объект <see cref="IpAdressLocationController"/>  c параметром <paramref name="ipAdressLocationService"/>.
+        /// </summary>
+        /// <param name="ipAdressLocationService">объект <see cref="IpAdressLocationService"/>, определяющий местоположение IP-адреса</param>
         public IpAdressLocationController(IpAdressLocationService ipAdressLocationService)
         {
             this.ipAdressLocationService = ipAdressLocationService;
         }
 
+        /// <summary>
+        /// Возвращает информацию о местоположении <paramref name="ipAddress"/> от выбранного <paramref name="provider"/>
+        /// </summary>
+        /// <param name="ipAddress">IP-адрес, местоположение которого нужно найти.</param>
+        /// <param name="provider">Провайдер, который будет использоваться для получения информации о местоположении IP-адреса.</param>
+        /// <returns><see cref="JsonResult"/> с информацией о местоположении <paramref name="ipAddress"/></returns>
+        /// <remarks>
+        /// Если <paramref name="ipAddress"/> или <paramref name="provider"/> является не допустимым, возвращает сообщение об ошибке.
+        /// </remarks>
         [HttpGet]
-        public IActionResult GetIpLocation([FromQuery] string ip,[FromQuery] Provider provider) =>
-            MainLogic(new IpRequest(ip,provider)).Result;
+        public JsonResult GetIpLocation([FromQuery] string ipAddress,[FromQuery] Provider provider) =>
+            MainLogicAsync(new IpRequest(ipAddress,provider)).Result;
 
+        /// <summary>
+        /// Возвращает информацию о местоположении <paramref name="infoForRequest"/>
+        /// </summary>
+        /// <returns>Задача представляющая ассинхронную опреацию. Результат задачи <see cref="JsonResult"/> c информацией о местоположении <paramref name="infoForRequest"/></returns>
+        /// <remarks>
+        /// Если <paramref name="infoForRequest"/> является не допустимым, возвращает сообщение об ошибке.
+        /// </remarks>
         [HttpPost]
-        public IActionResult GetIpLocation([FromBody] IpRequest request) =>
-            MainLogic(request).Result;
+        public JsonResult GetIpLocation([FromBody] IpRequest infoForRequest) =>
+            MainLogicAsync(infoForRequest).Result;
 
-        private async Task<IActionResult> MainLogic (IpRequest request)
+        private async Task<JsonResult> MainLogicAsync (IpRequest infoForRequest)
         {
-            if (!IpAdressLocationService.IsValidIp(request.Ip))
+            if (!ipAdressLocationService.IsValidIp(infoForRequest.Ip))
                 return new JsonResult("Invalid IP");
 
-            if (request.Provider == 0)
-                return new JsonResult("provider is required fill");
-
-            if (!Enum.IsDefined(typeof(Provider), request.Provider))
+            if (!ipAdressLocationService.IsValidProvider(infoForRequest.Provider))
                 return new JsonResult("Invalid provider");
 
-            var responce = await ipAdressLocationService.GetAsync(request);
-            if (responce.StatusCode == Domain.Enum.StatusCode.Ok)
+            var responce = await ipAdressLocationService.GetAsync(infoForRequest);
+
+            if ((int)responce.StatusCode<400)
                 return new JsonResult(new 
                 {
                     responce.Result.Ip,
-                    Provider = responce.Result.Provider.ToString(),
                     responce.Result.City,
                     responce.Result.Region,
                     responce.Result.Country,
                     responce.Result.Timezone,
                 });
 
-            return new JsonResult(responce.Message!);
+            return new JsonResult(responce.ErrorMessage!);
         }
     }
 }
