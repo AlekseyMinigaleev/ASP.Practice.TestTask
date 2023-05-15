@@ -1,5 +1,4 @@
 ﻿using IpLocationService.Domain.Entity;
-using IpLocationService.Domain.Enum;
 using IpLocationService.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,7 +35,7 @@ namespace IpLocationService.Controllers
         /// Если <paramref name="ipAddress"/> или <paramref name="provider"/> является не допустимым, возвращает сообщение об ошибке.
         /// </remarks>
         [HttpGet]
-        public JsonResult GetIpLocation([FromQuery] string ipAddress,[FromQuery] Provider provider) =>
+        public JsonResult GetIpLocation([FromQuery] string ipAddress,[FromQuery] int provider) =>
             MainLogicAsync(new IpRequest(ipAddress,provider)).Result;
 
         /// <summary>
@@ -47,16 +46,13 @@ namespace IpLocationService.Controllers
         /// Если <paramref name="infoForRequest"/> является не допустимым, возвращает сообщение об ошибке.
         /// </remarks>
         [HttpPost]
-        public JsonResult GetIpLocation([FromBody] IpRequest infoForRequest) =>
+        public IActionResult GetIpLocation([FromBody] IpRequest infoForRequest) =>
             MainLogicAsync(infoForRequest).Result;
 
         private async Task<JsonResult> MainLogicAsync (IpRequest infoForRequest)
         {
             if (!ipAdressLocationService.IsValidIp(infoForRequest.Ip))
                 return new JsonResult("Invalid IP");
-
-            if (!ipAdressLocationService.IsValidProvider(infoForRequest.Provider))
-                return new JsonResult("Invalid provider");
 
             var responce = await ipAdressLocationService.GetAsync(infoForRequest);
 

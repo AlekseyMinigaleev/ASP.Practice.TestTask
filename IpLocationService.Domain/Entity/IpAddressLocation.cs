@@ -1,6 +1,4 @@
-﻿using IpLocationService.Domain.Enum;
-
-namespace IpLocationService.Domain.Entity
+﻿namespace IpLocationService.Domain.Entity
 {
     /// <summary>
     /// Представляет сущность, описывающаю информацию о местоположении IP-адреса.
@@ -21,9 +19,9 @@ namespace IpLocationService.Domain.Entity
         public string Ip { get; set; } = null!;
 
         /// <summary>
-        /// Сторонний сервис, использованный для определения местоположения IP-адреса.
+        /// Id Стороннего сервиса, который будет использоваться для определения местоположения IP-адреса.
         /// </summary>
-        public Provider Provider { get; set; }
+        public int ProviderId { get; set; }
 
         /// <summary>
         /// Город, соответствующий местоположению IP-адреса.

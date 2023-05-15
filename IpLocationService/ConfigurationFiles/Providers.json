@@ -1,0 +1,22 @@
+{
+  "Providers": {
+    "Ipgeolocation": {
+      "Id": "1",
+      "Ip": "ip",
+      "City": "city",
+      "Region": "state_prov",
+      "Country": "country_name",
+      "Timezone": "time_zone.name",
+      "url": "https://api.ipgeolocation.io/ipgeo?apiKey=b45b2541d9a94d7894e1e0f7dd029a71&ip={0}"
+    },
+    "Ipinfo": {
+      "Id": "2",
+      "Ip": "ip",
+      "City": "city",
+      "Region": "region",
+      "Country": "country",
+      "Timezone": "timezone",
+      "url": "https://ipinfo.io/{0}?token=d9dd53b48541ee"
+    }
+  }
+}

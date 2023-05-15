@@ -1,22 +1,19 @@
 ﻿using Azure.Core;
 using IpLocationService.DAL.Repositories;
 using IpLocationService.Domain.Entity;
-using IpLocationService.Domain.Enum;
 using IpLocationService.Domain.Responce;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System.Net;
 using System.Text.RegularExpressions;
 
 namespace IpLocationService.Service
 {
-
     /// <summary>
     /// Класс для опредления местоположения ip-адреса
     /// </summary>
     public class IpAdressLocationService
     {
-        private const string IPINFO_TOKEN = "d9dd53b48541ee";
-        private const string IPGEOLOCATION_TOKEN = "b45b2541d9a94d7894e1e0f7dd029a71";
         private readonly IpAdressLocationRepository adressLocationRepository;
 
         /// <summary>
@@ -28,7 +25,6 @@ namespace IpLocationService.Service
             this.adressLocationRepository = adressLocationRepository;
         }
 
-        /*TODO тут хуйня с ServiceResponse<T>*/
         /// <summary> 
         /// Ассинхронно возвращает <see cref="ServiceResponse{IpAddressLocation}"/> содержащий информацию о местоположении IP-адреса на основе <paramref name="infoForRequest"/>
         /// </summary>
@@ -71,23 +67,6 @@ namespace IpLocationService.Service
         }
 
         /// <summary>
-        ///  Проверяет, является ли указанный <paramref name="provider"/> допустимым
-        /// </summary>
-        /// <param name="provider"><see cref="Provider"/>, который следует проверить</param>
-        /// <returns>
-        /// <see langword="true"/> если <paramref name="provider"/> допустимый; иначе <see langword="false"/>.
-        /// </returns>
-        /// <remarks>
-        /// <paramref name="provider"/> является не допустимым, если имеет значение 0.
-        /// </remarks>
-        public bool IsValidProvider(Provider provider)
-        {
-            if (provider == 0)
-                return false;
-            return Enum.IsDefined(typeof(Provider), provider);
-        }
-
-        /// <summary>
         ///  Проверяет, является ли указанный <paramref name="ip"/> допустимым
         /// </summary>
         /// <param name="ip"> IP-адресс для проверки</param>
@@ -104,10 +83,15 @@ namespace IpLocationService.Service
 
         private async Task<IpAddressLocation> GetIpLocationFromProviderAsync(IpRequest request)
         {
-            var (apiUrl, parametrs) = GetDataForRequestToProvider(request);
+            var configJson = File.ReadAllText("ConfigurationFiles\\Providers.json");
+            if (configJson is null)
+                throw new Exception("Provider.Json file is empty");
+
+            var config = JsonConvert.DeserializeObject<Config>(configJson);
+            var (apiUrl, parametrs) = GetDataForRequestToProvider(request,config);
             var providerResponse = await GetResponseFromProviderAsync(apiUrl);
             var ipAddressLocation = await ConvertResponseToIpAdressLocation(providerResponse, parametrs);
-            ipAddressLocation.Provider = request.Provider;
+            ipAddressLocation.ProviderId = request.ProviderId;
 
             if (ipAddressLocation is null)
                 throw new Exception("Location was not determined");
@@ -115,41 +99,28 @@ namespace IpLocationService.Service
             return ipAddressLocation;
         }
 
-        /*TODO hardCode*/
-        private static (string, Dictionary<string, string>) GetDataForRequestToProvider(IpRequest request)
+        private static (string, Dictionary<string, string>) GetDataForRequestToProvider(IpRequest request, Config config)
         {
-            switch (request.Provider)
-            {
-                case Provider.Ipgeolocation:
-                    {
-                        var fieldMappings = new Dictionary<string, string>
-                            {
-                                {"Ip", "ip"},
-                                {"City", "city"},
-                                {"Region", "state_prov"},
-                                {"Country", "country_name"},
-                                {"Timezone", "time_zone.name"},
-                            };
-                        var apiUrl = $"https://api.ipgeolocation.io/ipgeo?apiKey={IPGEOLOCATION_TOKEN}&ip={request.Ip}";
+            var providerConfig = config.Providers
+                .FirstOrDefault(p => p.Value.Id
+                    .Equals(request.ProviderId))
+                .Value;
 
-                        return (apiUrl, fieldMappings);
-                    }
-                case Provider.Ipinfo:
-                    {
-                        var fieldMappings = new Dictionary<string, string>
-                            {
-                                {"Ip", "ip"},
-                                {"City", "city"},
-                                {"Region", "region"},
-                                {"Country", "country"},
-                                {"Timezone", "timezone"},
-                            };
-                        var apiUrl = $"https://ipinfo.io/{request.Ip}?token={IPINFO_TOKEN}";
-                        return (apiUrl, fieldMappings);
-                    }
-                default:
-                    throw new Exception("Invalid provider");
-            }
+            if (providerConfig is null)
+                throw new Exception("Invalid provider");
+
+            var apiUrl = $"{string.Format(providerConfig.Url, request.Ip)}";
+
+            var fieldMappings = new Dictionary<string, string>
+            {
+                {"Ip", providerConfig.Ip},
+                {"City", providerConfig.City},
+                {"Region", providerConfig.Region},
+                {"Country", providerConfig.Country},
+                {"Timezone", providerConfig.Timezone},
+            };
+
+            return (apiUrl, fieldMappings);
         }
 
         private static async Task<HttpResponseMessage> GetResponseFromProviderAsync(string apiUrl)
@@ -159,12 +130,10 @@ namespace IpLocationService.Service
             return response;
         }
 
-        /*TODO ??? */
-        #region ne ponyatno nihuya
         private async Task<IpAddressLocation> ConvertResponseToIpAdressLocation(HttpResponseMessage response, Dictionary<string, string> parameters)
         {
             var jsonContent = await response.Content.ReadAsStringAsync();
-            dynamic jObject = JsonConvert.DeserializeObject(jsonContent);
+            dynamic jObject = JsonConvert.DeserializeObject(jsonContent)!;
 
             var locationResponse = new IpAddressLocation();
         
@@ -193,6 +162,5 @@ namespace IpLocationService.Service
 
             return result?.ToString();
         }
-        #endregion
     }
 }

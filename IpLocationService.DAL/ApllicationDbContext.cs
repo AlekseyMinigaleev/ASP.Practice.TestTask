@@ -1,6 +1,8 @@
-﻿using IpLocationService.Domain.Entity;
+﻿using Azure.Core;
+using IpLocationService.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace IpLocationService.DAL
 {
@@ -13,33 +15,31 @@ namespace IpLocationService.DAL
         /// Свойство, представляющее таблицу записей местоположения IP-адресов.
         /// </summary>
         public DbSet<IpAddressLocation> IpAdressLocations { get; set; }
-
         /// <summary>
         /// Создает новый экземпляр класса <see cref="ApplicationDbContext"/>.
         /// </summary>
         /// <remarks>В момент создания экземпляра класса, создается база данные, если она не была создана.</remarks>
         public ApplicationDbContext()
         {
-            Database.EnsureCreated();
+             Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            /*TODO ???*/
             var builder = new ConfigurationBuilder();
             builder.SetBasePath(Directory.GetCurrentDirectory());
             builder.AddJsonFile("appsettings.json");
             var config = builder.Build();
-
-            var connectionString = config.GetConnectionString("SqlServerConntection");
-            optionsBuilder.UseSqlServer(connectionString);
+            var connectionString = config.GetConnectionString("SqliteConnection");
+            optionsBuilder.UseSqlite(connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Ignore<IpRequest>();
+            modelBuilder.Ignore<ProviderConfig>();
             modelBuilder.Entity<IpAddressLocation>()
-              .HasKey(_ => _.Id);
+                .HasKey(_ => _.Id);
         }
     }
 }

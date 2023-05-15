@@ -34,7 +34,7 @@ namespace IpLocationService.DAL.Repositories
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OperationCanceledException"></exception>
         public async Task<IpAddressLocation?> GetByIpRequestAsync(IpRequest request) =>
-        await db.IpAdressLocations.FirstOrDefaultAsync(_ => _.Ip == request.Ip && _.Provider == request.Provider);
+        await db.IpAdressLocations.FirstOrDefaultAsync(_ => _.Ip == request.Ip && _.ProviderId == request.ProviderId);
 
 
         /// <summary>
@@ -59,6 +59,6 @@ namespace IpLocationService.DAL.Repositories
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="OperationCanceledException"></exception>
         public async Task<bool> IsExistByIpRequestAsync(IpRequest request)=>
-            await db.IpAdressLocations.AnyAsync(_ => _.Ip == request.Ip && _.Provider == request.Provider);
+            await db.IpAdressLocations.AnyAsync(_ => _.Ip == request.Ip && _.ProviderId == request.ProviderId);
     }
 }
