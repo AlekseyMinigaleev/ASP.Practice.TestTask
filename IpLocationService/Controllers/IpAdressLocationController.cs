@@ -14,15 +14,15 @@ namespace IpLocationService.Controllers
     [ApiController]
     public class IpAdressLocationController : ControllerBase
     {
-        private readonly IpAdressLocationService ipAdressLocationService;
+        private readonly IpAddressLocationService ipAddressLocationService;
 
         /// <summary>
-        /// Создает новый объект <see cref="IpAdressLocationController"/>  c параметром <paramref name="ipAdressLocationService"/>.
+        /// Создает новый объект <see cref="IpAdressLocationController"/>  c параметром <paramref name="ipAddressLocationService"/>.
         /// </summary>
-        /// <param name="ipAdressLocationService">объект <see cref="IpAdressLocationService"/>, определяющий местоположение IP-адреса</param>
-        public IpAdressLocationController(IpAdressLocationService ipAdressLocationService)
+        /// <param name="ipAddressLocationService">объект <see cref="IpAddressLocationService"/>, определяющий местоположение IP-адреса</param>
+        public IpAdressLocationController(IpAddressLocationService ipAddressLocationService)
         {
-            this.ipAdressLocationService = ipAdressLocationService;
+            this.ipAddressLocationService = ipAddressLocationService;
         }
 
         /// <summary>
@@ -51,10 +51,10 @@ namespace IpLocationService.Controllers
 
         private async Task<JsonResult> MainLogicAsync (IpRequest infoForRequest)
         {
-            if (!ipAdressLocationService.IsValidIp(infoForRequest.Ip))
+            if (!ipAddressLocationService.IsValidIp(infoForRequest.Ip))
                 return new JsonResult("Invalid IP");
 
-            var responce = await ipAdressLocationService.GetAsync(infoForRequest);
+            var responce = await ipAddressLocationService.GetAsync(infoForRequest);
 
             if ((int)responce.StatusCode<400)
                 return new JsonResult(new 

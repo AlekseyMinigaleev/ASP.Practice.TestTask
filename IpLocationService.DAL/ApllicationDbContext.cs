@@ -1,8 +1,6 @@
-﻿using Azure.Core;
-using IpLocationService.Domain.Entity;
+﻿using IpLocationService.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace IpLocationService.DAL
 {

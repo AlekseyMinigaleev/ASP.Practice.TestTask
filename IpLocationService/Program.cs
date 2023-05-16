@@ -9,8 +9,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>();
-builder.Services.AddScoped<IpAdressLocationRepository>();
-builder.Services.AddScoped<IpAdressLocationService>();
+builder.Services.AddScoped<IpAddressLocationRepository>();
+builder.Services.AddScoped<IpAddressLocationService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

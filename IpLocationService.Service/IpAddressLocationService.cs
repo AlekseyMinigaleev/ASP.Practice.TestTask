@@ -1,8 +1,6 @@
-﻿using Azure.Core;
-using IpLocationService.DAL.Repositories;
+﻿using IpLocationService.DAL.Repositories;
 using IpLocationService.Domain.Entity;
 using IpLocationService.Domain.Responce;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -12,17 +10,17 @@ namespace IpLocationService.Service
     /// <summary>
     /// Класс для опредления местоположения ip-адреса
     /// </summary>
-    public class IpAdressLocationService
+    public class IpAddressLocationService
     {
-        private readonly IpAdressLocationRepository adressLocationRepository;
+        private readonly IpAddressLocationRepository addressLocationRepository;
 
         /// <summary>
-        /// Создает новый объект <see cref="IpAdressLocationService"/> c параметром <paramref name="adressLocationRepository"/>.
+        /// Создает новый объект <see cref="IpAddressLocationService"/> c параметром <paramref name="addressLocationRepository"/>.
         /// </summary>
-        /// <param name="adressLocationRepository">Репозиторий для работы с базой данных</param>
-        public IpAdressLocationService(IpAdressLocationRepository adressLocationRepository)
+        /// <param name="addressLocationRepository">Репозиторий для работы с базой данных</param>
+        public IpAddressLocationService(IpAddressLocationRepository addressLocationRepository)
         {
-            this.adressLocationRepository = adressLocationRepository;
+            this.addressLocationRepository = addressLocationRepository;
         }
 
         /// <summary> 
@@ -39,15 +37,15 @@ namespace IpLocationService.Service
             try
             {   
                 IpAddressLocation ipAddressLocation;
-                var isExistInDatatbase = await adressLocationRepository.IsExistByIpRequestAsync(infoForRequest);
+                var isExistInDatatbase = await addressLocationRepository.IsExistByIpRequestAsync(infoForRequest);
                 if (isExistInDatatbase)
                 {
-                    ipAddressLocation = (await adressLocationRepository.GetByIpRequestAsync(infoForRequest))!;
+                    ipAddressLocation = (await addressLocationRepository.GetByIpRequestAsync(infoForRequest))!;
                 }
                 else
                 {
                     ipAddressLocation = await GetIpLocationFromProviderAsync(infoForRequest);
-                    await adressLocationRepository.AddAsync(ipAddressLocation);
+                    await addressLocationRepository.AddAsync(ipAddressLocation);
                 }
 
                 return new ServiceResponse<IpAddressLocation>
@@ -81,17 +79,17 @@ namespace IpLocationService.Service
             return Regex.IsMatch(ip, pattern);
         }
 
-        private async Task<IpAddressLocation> GetIpLocationFromProviderAsync(IpRequest request)
+        private async Task<IpAddressLocation> GetIpLocationFromProviderAsync(IpRequest infoForRequest)
         {
-            var configJson = File.ReadAllText("ConfigurationFiles\\Providers.json");
+            var configJson = File.ReadAllText("Properties\\ProvidersSettings.json");
             if (configJson is null)
                 throw new Exception("Provider.Json file is empty");
 
             var config = JsonConvert.DeserializeObject<Config>(configJson);
-            var (apiUrl, parametrs) = GetDataForRequestToProvider(request,config);
+            var (apiUrl, parametrs) = GetDataForRequestToProvider(infoForRequest,config);
             var providerResponse = await GetResponseFromProviderAsync(apiUrl);
             var ipAddressLocation = await ConvertResponseToIpAdressLocation(providerResponse, parametrs);
-            ipAddressLocation.ProviderId = request.ProviderId;
+            ipAddressLocation.ProviderId = infoForRequest.ProviderId;
 
             if (ipAddressLocation is null)
                 throw new Exception("Location was not determined");
@@ -99,17 +97,17 @@ namespace IpLocationService.Service
             return ipAddressLocation;
         }
 
-        private static (string, Dictionary<string, string>) GetDataForRequestToProvider(IpRequest request, Config config)
+        private static (string, Dictionary<string, string>) GetDataForRequestToProvider(IpRequest infoForRequest, Config config)
         {
             var providerConfig = config.Providers
                 .FirstOrDefault(p => p.Value.Id
-                    .Equals(request.ProviderId))
+                    .Equals(infoForRequest.ProviderId))
                 .Value;
 
             if (providerConfig is null)
                 throw new Exception("Invalid provider");
 
-            var apiUrl = $"{string.Format(providerConfig.Url, request.Ip)}";
+            var apiUrl = $"{string.Format(providerConfig.Url, infoForRequest.Ip)}";
 
             var fieldMappings = new Dictionary<string, string>
             {
@@ -130,14 +128,14 @@ namespace IpLocationService.Service
             return response;
         }
 
-        private async Task<IpAddressLocation> ConvertResponseToIpAdressLocation(HttpResponseMessage response, Dictionary<string, string> parameters)
+        private async Task<IpAddressLocation> ConvertResponseToIpAdressLocation(HttpResponseMessage response, Dictionary<string, string> fieldMappings)
         {
             var jsonContent = await response.Content.ReadAsStringAsync();
             dynamic jObject = JsonConvert.DeserializeObject(jsonContent)!;
 
             var locationResponse = new IpAddressLocation();
         
-            foreach (var parameter in parameters)
+            foreach (var parameter in fieldMappings)
             {
                 var propertyInfo = typeof(IpAddressLocation).GetProperty(parameter.Key);
                 if (propertyInfo != null)

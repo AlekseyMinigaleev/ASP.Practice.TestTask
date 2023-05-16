@@ -6,15 +6,15 @@ namespace IpLocationService.DAL.Repositories
     /// <summary>
     /// Класс, представляющий репозиторий для работы с объектами типа <see cref="IpAddressLocation"/> в базе данных.
     /// </summary>
-    public class IpAdressLocationRepository 
+    public class IpAddressLocationRepository 
     {
         private readonly ApplicationDbContext db;
 
         /// <summary>
-        /// Создает новый экземпляр класса <see cref="IpAdressLocationRepository"/>, используя указанный контекст базы данных.
+        /// Создает новый экземпляр класса <see cref="IpAddressLocationRepository"/>, используя указанный контекст базы данных.
         /// </summary>
         /// <param name="dbContext">Контекст базы данных.</param>
-        public IpAdressLocationRepository(ApplicationDbContext dbContext)
+        public IpAddressLocationRepository(ApplicationDbContext dbContext)
         {
             db = dbContext;
         }
